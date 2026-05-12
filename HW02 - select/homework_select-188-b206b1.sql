@@ -64,13 +64,13 @@ datename(month, OrderDate) as OrderMonth,
 datepart(quarter, OrderDate) as OrderQuarter,
 case 
 when datepart(MONTH, OrderDate) in ('1', '2', '3', '4') then 1
-when datepart(MONTH, OrderDate) in ('5', '6', '7', '8') then 1
+when datepart(MONTH, OrderDate) in ('5', '6', '7', '8') then 2
 else 3
 end as YearThird,
 CustomerName
 from Sales.Orders o
 join Sales.Customers c on c.CustomerID = o.CustomerID
-join Sales.OrderLines l on l.OrderID = o.OrderID and (l.UnitPrice > 100 or l.Quantity > 20) and o.PickingCompletedWhen <> ''
+join Sales.OrderLines l on l.OrderID = o.OrderID and (l.UnitPrice > 100 or l.Quantity > 20) and o.PickingCompletedWhen is not null
 order by OrderQuarter, YearThird, OrderDate
 offset 1000 rows 
 fetch next 100 rows only
@@ -94,7 +94,7 @@ from Purchasing.PurchaseOrders o
 join Purchasing.Suppliers s on s.SupplierID = o.SupplierID 
 join Application.DeliveryMethods m on m.DeliveryMethodID = o.DeliveryMethodID
 join Application.People p on p.PersonID = o.ContactPersonID
-where o.ExpectedDeliveryDate between '2013-12-01' and '2013-12-31' and m.DeliveryMethodName in ('Air Freight', 'Refrigerated Air Freight') or o.IsOrderFinalized = 1
+where o.ExpectedDeliveryDate between '2013-01-01' and '2013-01-31' and m.DeliveryMethodName in ('Air Freight', 'Refrigerated Air Freight') and o.IsOrderFinalized = 1
 
 
 /*
