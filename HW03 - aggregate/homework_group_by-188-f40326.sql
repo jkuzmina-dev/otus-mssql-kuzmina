@@ -95,26 +95,42 @@ order by Year, Month, StockItemName
 Написать запросы 2-3 так, чтобы если в каком-то месяце не было продаж,
 то этот месяц также отображался бы в результатах, но там были нули.
 */
-select year(InvoiceDate) as Year,
-month(InvoiceDate) as Month,
+use master;
+CREATE TABLE tbl_Calendar (
+    ID INT IDENTITY,
+    [Date] DATE,
+    [Day] INT,
+    [Month] INT,
+    [Year] INT
+);
+
+DECLARE @SetStartDate DATE, @Start INT, @Stop INT, @Step INT;
+SET @SetStartDate = '2013-01-01'; -- Начальная дата календаря
+SET @Start = 0;
+SET @Stop = 365*4; -- Количество дней (4 года);
+SET @Step = 1;
+
+INSERT INTO tbl_Calendar (
+    [Date],
+    [Day],
+    [Month],
+    [Year]
+)
+SELECT DATEADD(DAY, value, @SetStartDate) AS [Date],
+       DATEPART(DAY, DATEADD(DAY, value, @SetStartDate)) AS [Day],
+       MONTH(DATEADD(DAY, value, @SetStartDate)) AS [Month],
+       YEAR(DATEADD(DAY, value, @SetStartDate)) AS [Year]
+FROM GENERATE_SERIES(@Start, @Stop, @Step);
+
+use WideWorldImporters;
+select c.Year,
+c.Month,
 case when sum(ExtendedPrice) > 4600000 then sum(ExtendedPrice)
 else 0 end as SumAmount
-from Sales.Invoices i
-join Sales.InvoiceLines l on l.InvoiceID = i.InvoiceID
-group by year(InvoiceDate), month(InvoiceDate)
+from master.dbo.tbl_Calendar c
+left join Sales.Invoices i on c.Date = i.InvoiceDate
+left join Sales.InvoiceLines l on l.InvoiceID = i.InvoiceID
+group by Year, Month
 order by Year, Month
 
-select year(InvoiceDate) as Year,
-month(InvoiceDate) as Month,
-case when sum(Quantity) < 50 then StockItemName
-else '-' end as StockItemName,
-case when sum(Quantity) < 50 then sum(ExtendedPrice)
-else 0 end as SumAmount,
-min(InvoiceDate) as FirstInvoiceDate,
-case when sum(Quantity) < 50 then sum(Quantity)
-else 0 end as Quantity
-from Sales.Invoices i
-join Sales.InvoiceLines l on l.InvoiceID = i.InvoiceID
-join Warehouse.StockItems si on si.StockItemID = l.StockItemID
-group by year(InvoiceDate), month(InvoiceDate), StockItemName
-order by Year, Month, StockItemName
+
