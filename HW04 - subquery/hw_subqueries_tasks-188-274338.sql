@@ -65,7 +65,7 @@ where UnitPrice = (select min(UnitPrice) from Warehouse.StockItems)
 
 select StockItemId, StockItemName, UnitPrice
 from Warehouse.StockItems i
-where UnitPrice <=ALL (select min(UnitPrice) from Warehouse.StockItems)
+where UnitPrice = (select top 1 UnitPrice from Warehouse.StockItems order by UnitPrice)
 
 /*
 3. Выберите информацию по клиентам, которые перевели компании пять максимальных платежей 
@@ -78,15 +78,15 @@ from Sales.Customers
 where CustomerId in (
 	select top 5 CustomerId
 		from Sales.CustomerTransactions
-		where TransactionTypeID = 3
-		order by TransactionAmount
+		--where TransactionTypeID = 3
+		order by TransactionAmount desc
 		)
 
-with transCTE as (
+;with transCTE as (
 	select top 5 CustomerId
 		from Sales.CustomerTransactions
-		where TransactionTypeID = 3
-		order by TransactionAmount
+		--where TransactionTypeID = 3
+		order by TransactionAmount desc
 		)
 select distinct c.CustomerID, CustomerName
 from Sales.Customers c
