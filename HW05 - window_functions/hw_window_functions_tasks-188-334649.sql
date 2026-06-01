@@ -158,7 +158,8 @@ COUNT(StockItemId) OVER (PARTITION BY left(StockItemName, 1) ORDER BY StockItemN
 RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) as ItemCountByLetter,
 LEAD(StockItemId) OVER (PARTITION BY left(StockItemName, 1) ORDER BY StockItemName) as LeadItemId,
 LAG(StockItemId) OVER (PARTITION BY left(StockItemName, 1) ORDER BY StockItemName) as LagItemId,
-LAG(convert(varchar(20), StockItemId), 2, 'No items') OVER (PARTITION BY left(StockItemName, 1) ORDER BY StockItemName) as LagItemId2
+LAG(StockItemName, 2, 'No items') OVER (PARTITION BY left(StockItemName, 1) ORDER BY StockItemName) as LagItemName,
+NTILE(30) OVER (ORDER BY TypicalWeightPerUnit) as GroupId
 from Warehouse.StockItems s
 order by StockItemName
 
@@ -192,12 +193,17 @@ select * from(
 6. Выберите по каждому клиенту два самых дорогих товара, которые он покупал.
 В результатах должно быть ид клиета, его название, ид товара, цена, дата покупки.
 */
-select * from(
-	select c.CustomerID, CustomerName, StockItemID, UnitPrice, InvoiceDate,
-	DENSE_RANK() OVER (PARTITION BY c.CustomerId ORDER BY UnitPrice desc,StockItemID) as rn
+with expItemsCTE as (
+	select c.CustomerID, CustomerName, StockItemID, max(UnitPrice) as Price, max(InvoiceDate) as SalesDate
 	from Sales.InvoiceLines il 
 	join Sales.Invoices i on i.Invoiceid = il.InvoiceID
 	join Sales.Customers c on c.CustomerID = i.CustomerID
+	group by c.CustomerID, CustomerName, StockItemID
+)
+select * from(
+	select CustomerID, CustomerName, StockItemID, Price, SalesDate,
+	DENSE_RANK() OVER (PARTITION BY CustomerId ORDER BY Price desc, StockItemID) as rn
+	from expItemsCTE
 	) as tbl
 	where rn <= 2
 	order by CustomerID, rn, StockItemID
