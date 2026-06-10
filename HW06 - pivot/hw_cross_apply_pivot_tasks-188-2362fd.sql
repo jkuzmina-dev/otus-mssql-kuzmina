@@ -135,19 +135,19 @@ select
 	c.CustomerID, 
 	c.CustomerName,
 	p.StockItemID,
-	p.UnitPrice,
+	p.Price,
 	p.SalesDate
 	from Sales.Customers as c 
 CROSS APPLY 
 (
 	SELECT TOP (2) 
 		StockItemID,
-		UnitPrice,
+		max(UnitPrice) as Price,
 		max(InvoiceDate) as SalesDate
 	from Sales.Invoices i
 	join Sales.InvoiceLines il on il.InvoiceID = i.InvoiceID
 	where i.CustomerID = c.CustomerID
-	group by UnitPrice, StockItemID
-	order by UnitPrice desc
+	group by StockItemID
+	order by max(UnitPrice) desc
 ) as p
-order by CustomerID, UnitPrice desc
+order by CustomerID, Price desc
