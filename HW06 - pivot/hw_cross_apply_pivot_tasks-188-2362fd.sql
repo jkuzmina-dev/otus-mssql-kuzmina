@@ -131,23 +131,39 @@ UNPIVOT
 В результатах должно быть ид клиета, его название, ид товара, цена, дата покупки.
 */
 
-select 
-	c.CustomerID, 
-	c.CustomerName,
-	p.StockItemID,
-	p.Price,
-	p.SalesDate
-	from Sales.Customers as c 
-CROSS APPLY 
+select
+	t.CustomerID, 
+	t.CustomerName,
+	t.StockItemID,
+	t.Price,
+	d.InvoiceDate
+	from 
 (
-	SELECT TOP (2) 
-		StockItemID,
-		max(UnitPrice) as Price,
-		max(InvoiceDate) as SalesDate
-	from Sales.Invoices i
-	join Sales.InvoiceLines il on il.InvoiceID = i.InvoiceID
-	where i.CustomerID = c.CustomerID
-	group by StockItemID
-	order by max(UnitPrice) desc
-) as p
+	select 
+		c.CustomerID, 
+		c.CustomerName,
+		p.StockItemID,
+		p.Price
+		from Sales.Customers as c 
+	CROSS APPLY 
+	(
+		SELECT TOP (2) 
+			StockItemID,
+			max(UnitPrice) as Price
+		from Sales.Invoices i
+		join Sales.InvoiceLines il on il.InvoiceID = i.InvoiceID
+		where i.CustomerID = c.CustomerID
+		group by StockItemID
+		order by max(UnitPrice) desc
+	) as p
+) as t
+CROSS APPLY 
+	(
+		SELECT TOP (1) 
+			InvoiceDate
+		from Sales.Invoices i
+		join Sales.InvoiceLines il on il.InvoiceID = i.InvoiceID
+		where i.CustomerID = t.CustomerID and il.StockItemID = t.StockItemID and il.UnitPrice = t.Price
+		order by InvoiceDate desc
+	) as d
 order by CustomerID, Price desc
