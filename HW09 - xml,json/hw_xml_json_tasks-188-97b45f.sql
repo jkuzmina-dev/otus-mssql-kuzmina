@@ -92,6 +92,44 @@ EXEC sp_xml_removedocument @docHandle;
 
 SELECT * FROM #Items;
 
+-- обновление Warehouse.StockItems
+merge Warehouse.Stockitems as target
+using #Items as source on source.StockItemName = target.StockItemName COLLATE Latin1_General_100_CI_AS
+when matched then update set 
+	SupplierID = source.SupplierID,
+	UnitPackageID = source.UnitPackageID,
+	OuterPackageID = source.OuterPackageID,
+	QuantityPerOuter = source.QuantityPerOuter,
+	TypicalWeightPerUnit = source.TypicalWeightPerUnit,
+	LeadTimeDays = source.LeadTimeDays,
+	IsChillerStock = source.IsChillerStock,
+	TaxRate = source.TaxRate,
+	UnitPrice = source.UnitPrice
+when not matched by target then insert
+	([StockItemName],
+	[SupplierID],
+	[UnitPackageID],
+	[OuterPackageID],
+	[QuantityPerOuter],
+	[TypicalWeightPerUnit],
+	[LeadTimeDays],
+	[IsChillerStock],
+	[TaxRate],
+	[UnitPrice],
+	[LastEditedBy]) values
+	(source.StockItemName,
+	source.SupplierID,
+	source.UnitPackageID,
+	source.OuterPackageID,
+	source.QuantityPerOuter,
+	source.TypicalWeightPerUnit,
+	source.LeadTimeDays,
+	source.IsChillerStock,
+	source.TaxRate,
+	source.UnitPrice,
+	1
+	);
+
 DELETE FROM #Items;
 -- XQuery
 DECLARE @xQuery XML;
