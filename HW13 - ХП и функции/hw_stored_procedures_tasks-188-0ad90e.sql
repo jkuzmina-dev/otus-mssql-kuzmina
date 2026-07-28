@@ -32,12 +32,9 @@ AS
         SELECT @Result = 
         (select top 1 CustomerID
         from Sales.Invoices as i
-            CROSS APPLY (
-            select SUM(Quantity*UnitPrice) as Summ
-            from Sales.InvoiceLines as l where l.InvoiceID = i.InvoiceID
-            group by InvoiceID
-            ) s
-        order by s.Summ desc)
+        join Sales.InvoiceLines as l on l.InvoiceID = i.InvoiceID
+        group by CustomerID
+        order by SUM(Quantity*UnitPrice) desc)
         RETURN @Result;
     END;
 GO
