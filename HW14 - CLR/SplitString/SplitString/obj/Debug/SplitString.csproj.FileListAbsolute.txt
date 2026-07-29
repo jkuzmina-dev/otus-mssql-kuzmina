@@ -1,0 +1,6 @@
+C:\Users\user\source\repos\SplitString\SplitString\bin\Debug\SplitString.dll
+C:\Users\user\source\repos\SplitString\SplitString\bin\Debug\SplitString.pdb
+C:\Users\user\source\repos\SplitString\SplitString\obj\Debug\SplitString.csproj.AssemblyReference.cache
+C:\Users\user\source\repos\SplitString\SplitString\obj\Debug\SplitString.csproj.CoreCompileInputs.cache
+C:\Users\user\source\repos\SplitString\SplitString\obj\Debug\SplitString.dll
+C:\Users\user\source\repos\SplitString\SplitString\obj\Debug\SplitString.pdb
