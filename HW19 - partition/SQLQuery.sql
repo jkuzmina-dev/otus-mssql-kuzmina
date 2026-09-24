@@ -6,7 +6,7 @@ SELECT YEAR(TransactionOccurredWhen) as [year], count(*) as lines
 
 
 --создадим файловую группу
-ALTER DATABASE [WideWorldImporters] ADD FILEGROUP [YearDataTrans]
+ALTER DATABASE [WideWorldImporters] ADD FILEGROUP [YearData]
 GO
 
 --добавляем файл БД
